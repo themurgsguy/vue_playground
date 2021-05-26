@@ -10,17 +10,18 @@
       <b-col>
         <b-media>
           <template #aside>
-            <b-img height="128" blank-color="#ccc"/>
+            <b-img height="128" :src="`http://openweathermap.org/img/wn/${todaysForcast.weather[0].icon}@2x.png`"/>
+
           </template>
-          <h1>{{ apiForcast.current.temp }}º</h1>
-          <h3>{{ apiForcast.current.weather[0].main }}</h3>
+          <h1>{{ todaysForcast.temp }}º</h1>
+          <h3>{{ todaysForcast.weather[0].main }}</h3>
         </b-media>
-        <h4>{{ apiForcast.current.weather[0].description }}</h4>
+        <h4>{{ todaysForcast.weather[0].description }}</h4>
       </b-col>
     </b-row>
 
     <b-card-group deck>
-      <weather-card v-for="(day, index) in apiForcast.daily" :key="index" :forcast="day"/>
+      <weather-card v-for="(day, index) in fiveDayForcast" :key="index" :forcast="day"/>
     </b-card-group>
   </b-container>
 </template>
@@ -33,39 +34,44 @@ export default {
   components: {
     'weather-card': WeatherCard
   },
-  async mounted () {
-    const apiKey = process.env.VUE_APP_API_SECRECT
-
-    const location = {
+  async beforeCreate () {
+    const params = {
       lat: '40.20564',
-      lon: '-8.41955'
+      lon: '-8.41955',
+      key: process.env.VUE_APP_API_SECRECT
     }
-
     try {
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${location.lat}&lon=${location.lon}&units=metric&appid=${apiKey}`)
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${params.lat}&lon=${params.lon}&units=metric&appid=${params.key}`)
       if (response.ok) {
-        const text = await response.json()
-        this.apiForcast = text
+        this.apiForcast = await response.json()
       } else {
-        console.error('boom')
+        console.error('Boom')
       }
     } catch (e) {
-      console.error('error', e)
+      console.error('Boom', e)
+    }
+  },
+  computed: {
+    fiveDayForcast () {
+      return this.apiForcast.daily.slice(0, 5)
+    },
+    todaysForcast () {
+      return this.apiForcast.current
     }
   },
   data: () => ({
-    forcast: {
-      temperature: 23,
-      condition: 'Raining',
-      description: "It's sunny outside"
-    },
-    calendar: [
-      { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
-      { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
-      { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
-      { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
-      { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
-    ],
+    // forcast: {
+    //   temperature: 23,
+    //   condition: 'Raining',
+    //   description: "It's sunny outside"
+    // },
+    // calendar: [
+    //   { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
+    //   { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
+    //   { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
+    //   { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
+    //   { temperature: 23, condition: 'Raining', description: "It's sunny outside" },
+    // ],
     apiForcast: []
   })
 }

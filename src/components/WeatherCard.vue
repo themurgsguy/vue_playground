@@ -2,7 +2,7 @@
   <b-card>
     <b-media>
       <template #aside>
-        <b-img height="128" blank-color="#ccc"/>
+        <b-img height="60" :src="`http://openweathermap.org/img/wn/${forcast.weather[0].icon}@2x.png`"/>
       </template>
       <h3>{{ forcast.temp.max }}º</h3>
       <h3>{{ forcast.temp.min }}</h3>
